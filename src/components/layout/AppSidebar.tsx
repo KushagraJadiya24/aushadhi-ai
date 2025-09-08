@@ -1,13 +1,13 @@
 import { useState } from "react";
-import { 
-  Home, 
-  Users, 
-  FileText, 
-  Database, 
-  Stethoscope, 
+import {
+  Home,
+  Users,
+  FileText,
+  Database,
+  Stethoscope,
   Settings,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 
@@ -38,10 +38,10 @@ export function AppSidebar() {
   const currentPath = location.pathname;
   const isCollapsed = state === "collapsed";
 
-  const isActive = (path: string) => currentPath === path;
-
   return (
-    <Sidebar className={`transition-all duration-300 ${isCollapsed ? "w-16" : "w-64"}`}>
+    <Sidebar
+      className={`transition-all duration-300 ${isCollapsed ? "w-16" : "w-64"}`}
+    >
       <div className="flex h-full flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b">
@@ -51,7 +51,9 @@ export function AppSidebar() {
                 <Stethoscope className="h-5 w-5 text-primary-foreground" />
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-foreground">AyurDoc</h2>
+                <h2 className="text-lg font-semibold text-foreground">
+                  Aushadhi-Ai
+                </h2>
                 <p className="text-xs text-muted-foreground">Diet Management</p>
               </div>
             </div>
@@ -85,13 +87,17 @@ export function AppSidebar() {
                         className={({ isActive }) =>
                           `flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors ${
                             isActive
-                              ? "bg-primary text-primary-foreground shadow-soft"
-                              : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                              ? "bg-primary text-foreground/70 shadow-soft"
+                              : "text-foreground/90 hover:text-foreground hover:bg-muted"
                           }`
                         }
                       >
                         <item.icon className="h-5 w-5 flex-shrink-0" />
-                        {!isCollapsed && <span className="text-sm font-medium">{item.title}</span>}
+                        {!isCollapsed && (
+                          <span className="text-sm font-medium">
+                            {item.title}
+                          </span>
+                        )}
                       </NavLink>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
