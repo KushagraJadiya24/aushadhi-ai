@@ -28,7 +28,6 @@ const navigationItems = [
   { title: "Patients", url: "/patients", icon: Users },
   { title: "Diet Charts", url: "/diet-charts", icon: FileText },
   { title: "Food Database", url: "/food-database", icon: Database },
-  { title: "Assessments", url: "/assessments", icon: Stethoscope },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
 
