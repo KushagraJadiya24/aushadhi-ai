@@ -47,9 +47,14 @@ export function AppSidebar() {
         <div className="flex items-center justify-between p-4 border-b">
           {!isCollapsed && (
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                <Stethoscope className="h-5 w-5 text-primary-foreground" />
+              <div className="w-8 h-8 bg-[hsl(var(--green))] rounded-lg flex items-center justify-center">
+                <img
+                  src="/favicon.ico"
+                  alt="Logo"
+                  className="w-5 h-5 object-contain"
+                />
               </div>
+
               <div>
                 <h2 className="text-lg font-semibold text-foreground">
                   Aushadhi-Ai
