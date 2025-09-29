@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -35,43 +36,52 @@ const patientSchema = z.object({
 
 type PatientFormData = z.infer<typeof patientSchema>;
 
-export function AddPatientForm() {
+interface EditPatientFormProps {
+  patientId?: string;
+}
+
+export function EditPatientForm({ patientId }: EditPatientFormProps) {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Mock existing patient data - in a real app, this would be fetched
+  const existingPatient = {
+    firstName: "Rajesh",
+    lastName: "Kumar",
+    dateOfBirth: new Date("1979-03-15"),
+    gender: "male" as const,
+    weight: 75,
+    height: 175,
+    activityLevel: "moderately_active" as const,
+    medicalHistory: "Hypertension, managed with lifestyle modifications",
+    allergies: "Shellfish, Peanuts",
+    currentMedications: "Lisinopril 10mg daily",
+    primaryDosha: "pitta_kapha" as const,
+    prakriti: "Pitta dominant with Kapha secondary, moderate build, good digestion with tendency towards heat accumulation",
+  };
 
   const form = useForm<PatientFormData>({
     resolver: zodResolver(patientSchema),
-    defaultValues: {
-      firstName: "",
-      lastName: "",
-      gender: "male",
-      weight: 0,
-      height: 0,
-      activityLevel: "moderately_active",
-      medicalHistory: "",
-      allergies: "",
-      currentMedications: "",
-      primaryDosha: "vata",
-      prakriti: "",
-    },
+    defaultValues: existingPatient,
   });
 
   const onSubmit = async (data: PatientFormData) => {
     setIsSubmitting(true);
     try {
       // Here you would typically send the data to your backend
-      console.log("Patient data:", data);
+      console.log("Updated patient data:", data);
       
       toast({
-        title: "Patient Added Successfully",
-        description: `${data.firstName} ${data.lastName} has been added to your patient database.`,
+        title: "Patient Updated Successfully",
+        description: `${data.firstName} ${data.lastName}'s information has been updated.`,
       });
       
-      form.reset();
+      navigate(`/patients/${patientId}`);
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to add patient. Please try again.",
+        description: "Failed to update patient. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -84,10 +94,10 @@ export function AddPatientForm() {
       <CardHeader className="text-center">
         <CardTitle className="flex items-center justify-center gap-2 text-2xl">
           <User className="h-6 w-6 text-primary" />
-          Add New Patient
+          Edit Patient Information
         </CardTitle>
         <CardDescription>
-          Enter patient information to create a new health profile
+          Update patient information and health profile
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -159,7 +169,6 @@ export function AddPatientForm() {
                             date > new Date() || date < new Date("1900-01-01")
                           }
                           initialFocus
-                          className="pointer-events-auto"
                         />
                       </PopoverContent>
                     </Popover>
@@ -266,10 +275,10 @@ export function AddPatientForm() {
             {/* Ayurvedic Constitution */}
             <Card className="bg-sage-50">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <Flower className="h-5 w-5 text-sage-600" />
-                  Ayurvedic Constitution (Prakriti)
-                </CardTitle>
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Flower className="h-5 w-5 text-sage-600" />
+                Ayurvedic Constitution (Prakriti)
+              </CardTitle>
                 <CardDescription>
                   Determine the patient's inherent constitution and dosha balance
                 </CardDescription>
@@ -381,10 +390,14 @@ export function AddPatientForm() {
 
             <div className="flex gap-4 pt-4">
               <Button type="submit" disabled={isSubmitting} className="flex-1">
-                {isSubmitting ? "Adding Patient..." : "Add Patient"}
+                {isSubmitting ? "Updating Patient..." : "Update Patient"}
               </Button>
-              <Button type="button" variant="outline" onClick={() => form.reset()}>
-                Clear Form
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => navigate(`/patients/${patientId}`)}
+              >
+                Cancel
               </Button>
             </div>
           </form>

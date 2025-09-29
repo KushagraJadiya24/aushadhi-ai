@@ -178,8 +178,20 @@ const Patients = () => {
                     <TableCell>{patient.nextAppointment}</TableCell>
                     <TableCell>
                       <div className="flex gap-2">
-                        <Button size="sm" variant="outline">View</Button>
-                        <Button size="sm" variant="outline">Edit</Button>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => navigate(`/patients/${patient.id}`)}
+                        >
+                          View
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => navigate(`/patients/${patient.id}/edit`)}
+                        >
+                          Edit
+                        </Button>
                       </div>
                     </TableCell>
                   </TableRow>
