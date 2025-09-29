@@ -5,12 +5,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-import { ChefHat, Clock, Leaf, Flame, User, ArrowLeft, Edit, Save } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { ChefHat, Clock, Leaf, Flame, User, ArrowLeft, Edit, Save, Plus, Trash2 } from "lucide-react";
+import { AddFoodItemForm } from "@/components/forms/AddFoodItemForm";
+import { useToast } from "@/hooks/use-toast";
 
 const PatientDietChart = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [selectedMealIndex, setSelectedMealIndex] = useState(0);
 
   // Mock patient data
   const patient = {
@@ -23,7 +29,7 @@ const PatientDietChart = () => {
     activityLevel: "Moderately Active"
   };
 
-  const dietChart = {
+  const [dietChart, setDietChart] = useState({
     patientName: patient.name,
     dosha: patient.dosha,
     season: "Summer",
@@ -68,6 +74,44 @@ const PatientDietChart = () => {
       { principle: "Dosha Harmony", description: "Specifically designed for Pitta-Kapha constitution", status: "excellent" },
       { principle: "Agni Support", description: "Light, easily digestible foods to maintain digestive fire", status: "good" },
     ]
+  });
+
+  const addFoodItem = (mealIndex: number, foodItem: any) => {
+    setDietChart(prev => ({
+      ...prev,
+      meals: prev.meals.map((meal, index) => 
+        index === mealIndex 
+          ? { ...meal, items: [...meal.items, foodItem] }
+          : meal
+      )
+    }));
+    toast({
+      title: "Food Item Added",
+      description: `${foodItem.name} has been added to the meal.`,
+    });
+  };
+
+  const removeFoodItem = (mealIndex: number, itemIndex: number) => {
+    setDietChart(prev => ({
+      ...prev,
+      meals: prev.meals.map((meal, index) => 
+        index === mealIndex 
+          ? { ...meal, items: meal.items.filter((_, i) => i !== itemIndex) }
+          : meal
+      )
+    }));
+    toast({
+      title: "Food Item Removed",
+      description: "The food item has been removed from the meal.",
+    });
+  };
+
+  const handleSaveChanges = () => {
+    setIsEditing(false);
+    toast({
+      title: "Changes Saved",
+      description: "Diet chart has been updated successfully.",
+    });
   };
 
   const getRasaColor = (rasa: string) => {
@@ -114,7 +158,13 @@ const PatientDietChart = () => {
           <div className="flex gap-2">
             <Button 
               variant="outline" 
-              onClick={() => setIsEditing(!isEditing)}
+              onClick={() => {
+                if (isEditing) {
+                  handleSaveChanges();
+                } else {
+                  setIsEditing(true);
+                }
+              }}
               className="flex items-center gap-2"
             >
               {isEditing ? <Save className="h-4 w-4" /> : <Edit className="h-4 w-4" />}
@@ -152,13 +202,29 @@ const PatientDietChart = () => {
           {dietChart.meals.map((meal, mealIndex) => (
             <Card key={mealIndex} className={isEditing ? "border-primary/50" : ""}>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <Clock className="h-4 w-4 text-primary" />
-                  {meal.time}
+                <CardTitle className="flex items-center justify-between text-lg">
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-primary" />
+                    {meal.time}
+                    {isEditing && (
+                      <Badge variant="secondary" className="text-xs">
+                        Editable
+                      </Badge>
+                    )}
+                  </div>
                   {isEditing && (
-                    <Badge variant="secondary" className="text-xs">
-                      Editable
-                    </Badge>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        setSelectedMealIndex(mealIndex);
+                        setShowAddForm(true);
+                      }}
+                      className="flex items-center gap-1"
+                    >
+                      <Plus className="h-3 w-3" />
+                      Add Item
+                    </Button>
                   )}
                 </CardTitle>
               </CardHeader>
@@ -170,18 +236,46 @@ const PatientDietChart = () => {
                         <h4 className="font-medium">{item.name}</h4>
                         <p className="text-sm text-muted-foreground">{item.quantity}</p>
                       </div>
-                      <div className="flex flex-wrap gap-2">
-                        {item.rasa.split(', ').map((rasa, rasaIndex) => (
-                          <Badge key={rasaIndex} className={getRasaColor(rasa)} variant="secondary">
-                            {rasa}
+                      <div className="flex items-center gap-2">
+                        <div className="flex flex-wrap gap-2">
+                          {item.rasa.split(', ').map((rasa, rasaIndex) => (
+                            <Badge key={rasaIndex} className={getRasaColor(rasa)} variant="secondary">
+                              {rasa}
+                            </Badge>
+                          ))}
+                          <Badge variant="outline" className="text-xs">
+                            {item.virya}
                           </Badge>
-                        ))}
-                        <Badge variant="outline" className="text-xs">
-                          {item.virya}
-                        </Badge>
-                        <Badge variant="outline" className="text-xs bg-sage-50 text-sage-700">
-                          {item.dosha}
-                        </Badge>
+                          <Badge variant="outline" className="text-xs bg-sage-50 text-sage-700">
+                            {item.dosha}
+                          </Badge>
+                        </div>
+                        {isEditing && (
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button size="sm" variant="outline" className="text-destructive hover:text-destructive">
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Remove Food Item</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Are you sure you want to remove "{item.name}" from this meal? This action cannot be undone.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction 
+                                  onClick={() => removeFoodItem(mealIndex, itemIndex)}
+                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                >
+                                  Remove
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -261,6 +355,13 @@ const PatientDietChart = () => {
           <Button variant="outline">Copy Chart</Button>
           <Button>Save Chart</Button>
         </div>
+
+        <AddFoodItemForm
+          isOpen={showAddForm}
+          onClose={() => setShowAddForm(false)}
+          onAdd={(foodItem) => addFoodItem(selectedMealIndex, foodItem)}
+          mealTime={dietChart.meals[selectedMealIndex]?.time || ""}
+        />
       </div>
     </DashboardLayout>
   );
